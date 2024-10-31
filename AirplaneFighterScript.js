@@ -1,61 +1,9 @@
 let plane = document.getElementById("plane");
 let gameArea = document.getElementById("gameArea");
 let score = 0, gameInterval = 0;
+const hundred = 100, leftArrowKey = 37, rightArrowKey = 39, maxSize = 600;
+const frequency = 75;
 const positions = ["0px", "200px", "400px"];
-
-function moveObstacles() {
-    let obstacles = document.getElementsByClassName("obstacle");
-    for (let i = 0; i < obstacles.length; ++i) {
-        let topPosition = parseInt(window.getComputedStyle(obstacles[i]).top, 10);
-        obstacles[i].style.top = (topPosition + 1) + "px";
-        if (topPosition > 600) {
-            obstacles[i].remove();
-        }
-    }
-}
-
-function createObstacles() {
-    let obstacle = document.createElement("div");
-    obstacle.id = "obstacle";
-    obstacle.className = "obstacle";
-    const index1 = Math.floor(Math.random() * positions.length);
-    obstacle.style.left = positions[index1];
-    gameArea.appendChild(obstacle);
-}
-
-function startGame() {
-    const card = document.getElementById("startCard");
-    card.remove();
-    createObstacles();
-}
-
-document.addEventListener("keydown",function(e) {
-    let leftPosition = parseInt(window.getComputedStyle(plane).left, 10);
-    if(e.keyCode === 37 && leftPosition > 100) {
-        plane.style.left = (leftPosition - 200) + "px";
-    } else if (e.keyCode === 39 && leftPosition < 500) {
-        plane.style.left = (leftPosition + 200) + "px";
-    }
-});
-
-document.getElementById("startGame").addEventListener("click", function() {
-    gameInterval = setInterval(function () {
-        ++score;
-        if (!(score % 250)) {
-            createObstacles();
-        }
-        if (!(score % 100)) {
-            updateScore();
-        }
-        moveObstacles();
-        checkCollision();
-    }, 1);
-});
-
-function updateScore() {
-    const scoreBoard = document.getElementById("score");
-    scoreBoard.innerText = "Score: " + Math.floor(score / 100);
-}
 
 function isCollision(plane, obstacle) {
     let planeRect = plane.getBoundingClientRect();
@@ -68,15 +16,63 @@ function isCollision(plane, obstacle) {
     );
 }
 
-function checkCollision() {
-    const obstacles = document.getElementsByClassName("obstacle");
+function moveObstacles() {
+    let obstacles = document.getElementsByClassName("obstacle");
     for (let i = 0; i < obstacles.length; ++i) {
+        let topPosition = parseInt(window.getComputedStyle(obstacles[i]).top, 10);
+        obstacles[i].style.top = (topPosition + 3) + "px";
+        if (topPosition > maxSize) {
+            obstacles[i].remove();
+        }
         if (isCollision(plane, obstacles[i])) {
             clearInterval(gameInterval);
             showScore();
             break;
         }
     }
+}
+
+function createObstacles() {
+    let obstacle = document.createElement("div");
+    obstacle.id = "obstacle";
+    obstacle.className = "obstacle";
+    const index = Math.floor(Math.random() * positions.length);
+    obstacle.style.left = positions[index];
+    gameArea.appendChild(obstacle);
+}
+
+function startGame() {
+    const card = document.getElementById("startCard");
+    card.remove();
+    createObstacles();
+    startInterval();
+}
+
+document.addEventListener("keydown",function(e) {
+    let leftPosition = parseInt(window.getComputedStyle(plane).left, 10);
+    if(e.keyCode === leftArrowKey && leftPosition > hundred) {
+        plane.style.left = (leftPosition - 2 * hundred) + "px";
+    } else if (e.keyCode === rightArrowKey && leftPosition < maxSize - hundred) {
+        plane.style.left = (leftPosition + 2 * hundred) + "px";
+    }
+});
+
+function startInterval() {
+    gameInterval = setInterval(function () {
+        ++score;
+        if (!(score % frequency)) {
+            createObstacles();
+        }
+        if (!(score % hundred)) {
+            updateScore();
+        }
+        moveObstacles();
+    }, 10);
+}
+
+function updateScore() {
+    const scoreBoard = document.getElementById("score");
+    scoreBoard.innerText = "Score: " + Math.floor(score / hundred);
 }
 
 function addAttributes(element, attributes) {
@@ -88,7 +84,7 @@ function addAttributes(element, attributes) {
 
 function showScore() {
     let finalScore = addAttributes(document.createElement("div"), ["class", "card_result"]);
-    finalScore.innerText = "Game Over! Your score: " + Math.floor(score / 100);
+    finalScore.innerText = "Game Over! Your score: " + Math.floor(score / hundred);
     const restartButton = addAttributes(document.createElement("button"), ["class",
         "btn btn-primary", "style", "width:150px", "onclick", "window.location.reload()"]);
     restartButton.innerText = "Restart Game";
