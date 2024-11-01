@@ -1,6 +1,6 @@
 let plane = document.getElementById("plane");
 let gameArea = document.getElementById("gameArea");
-let score = 0, gameInterval = 0;
+let score = 0, gameInterval = 0, milliSeconds = 0;
 const hundred = 100, leftArrowKey = 37, rightArrowKey = 39, maxSize = 600;
 const frequency = 75;
 const positions = ["0px", "200px", "400px"];
@@ -22,6 +22,8 @@ function moveObstacles() {
         let topPosition = parseInt(window.getComputedStyle(obstacles[i]).top, 10);
         obstacles[i].style.top = (topPosition + 3) + "px";
         if (topPosition > maxSize) {
+            ++score;
+            updateScore();
             obstacles[i].remove();
         }
         if (isCollision(plane, obstacles[i])) {
@@ -59,12 +61,9 @@ document.addEventListener("keydown",function(e) {
 
 function startInterval() {
     gameInterval = setInterval(function () {
-        ++score;
-        if (!(score % frequency)) {
+        ++milliSeconds;
+        if (!(milliSeconds % frequency)) {
             createObstacles();
-        }
-        if (!(score % hundred)) {
-            updateScore();
         }
         moveObstacles();
     }, 10);
@@ -72,7 +71,7 @@ function startInterval() {
 
 function updateScore() {
     const scoreBoard = document.getElementById("score");
-    scoreBoard.innerText = "Score: " + Math.floor(score / hundred);
+    scoreBoard.innerText = "Score: " + score;
 }
 
 function addAttributes(element, attributes) {
@@ -84,7 +83,7 @@ function addAttributes(element, attributes) {
 
 function showScore() {
     let finalScore = addAttributes(document.createElement("div"), ["class", "card_result"]);
-    finalScore.innerText = "Game Over! Your score: " + Math.floor(score / hundred);
+    finalScore.innerText = "Game Over! Your score: " + score;
     const restartButton = addAttributes(document.createElement("button"), ["class",
         "btn btn-primary", "style", "width:150px", "onclick", "window.location.reload()"]);
     restartButton.innerText = "Restart Game";
